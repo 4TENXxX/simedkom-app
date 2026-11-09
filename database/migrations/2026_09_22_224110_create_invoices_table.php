@@ -1,0 +1,44 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('invoices', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('contract_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('media_profile_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('submitted_by')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('invoice_number')->unique();
+            $table->date('invoice_date');
+            $table->date('period_start');
+            $table->date('period_end');
+            $table->decimal('subtotal', 15, 2);
+            $table->decimal('tax', 15, 2)->default(0);
+            $table->decimal('total', 15, 2);
+            $table->string('status')->default('pending_finance_review')->index();
+            $table->text('review_notes')->nullable();
+            $table->string('invoice_path')->nullable();
+            $table->string('tax_document_path')->nullable();
+            $table->timestamps();
+
+            $table->index(['contract_id', 'status']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('invoices');
+    }
+};
